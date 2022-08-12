@@ -1,0 +1,87 @@
+import React from "react";
+import { idbPromise } from "../../utils/helpers";
+
+import { useStoreContext } from "../../utils/GlobalState";
+import { REMOVE_FROM_CART, UPDATE_CART_QUANTITY } from "../../utils/actions";
+const [, dispatch] = useStoreContext();
+import { idbPromise } from "../../utils/helpers";
+const removeFromCart = item => {
+  dispatch({
+    type: REMOVE_FROM_CART,
+    _id: item._id
+  });
+  idbPromise('cart', 'delete', { ...item });
+};
+
+
+const addToCart = () => {
+  const itemInCart = cart.find((cartItem) => cartItem._id === _id)
+  if (itemInCart) {
+    dispatch({
+      type: UPDATE_CART_QUANTITY,
+      _id: _id,
+      purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
+    });
+    idbPromise('cart', 'put', {
+      ...itemInCart,
+      purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
+    });
+  } else {
+    dispatch({
+      type: ADD_TO_CART,
+      product: { ...item, purchaseQuantity: 1 }
+    });
+    idbPromise('cart', 'put', { ...item, purchaseQuantity: 1 });
+  }
+}
+const onChange = (e) => {
+  const value = e.target.value;
+
+  if (value === '0') {
+    dispatch({
+      type: REMOVE_FROM_CART,
+      _id: item._id
+    });
+  
+    idbPromise('cart', 'delete', { ...item });
+  } else {
+    dispatch({
+      type: UPDATE_CART_QUANTITY,
+      _id: item._id,
+      purchaseQuantity: parseInt(value)
+    });
+  
+    idbPromise('cart', 'put', { ...item, purchaseQuantity: parseInt(value) });
+  }
+const CartItem = ({ item }) => {
+  return (
+    <div className="flex-row">
+      <div>
+        <img src={`/images/${item.image}`} alt="" />
+      </div>
+      <div>
+        <div>
+          {item.name}, ${item.price}
+        </div>
+        <div>
+          <span>Qty:</span>
+          <input
+            type="number"
+            placeholder="1"
+            value={item.purchaseQuantity}
+            onChange={onChange}
+          />
+          <span
+            role="img"
+            aria-label="trash"
+            onClick={() => removeFromCart(item)}
+          >
+            🗑️
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CartItem;
